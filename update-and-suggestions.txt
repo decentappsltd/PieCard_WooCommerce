@@ -1,0 +1,18 @@
+To ensure that the plugin code works correctly with your website and the Pi eCard platform, you need to perform the following modifications:
+
++ Is there a way we can retrive their provided webhook url then replace the 'woocommerce_api_complete' action with the correct webhook URL provided by the Pi eCard platform. The webhook URL needs to be registered with the Pi eCard dashboard.
+
++ Update the plugin's icon URL to a valid URL for your website.
+
++ Ensure that you have the correct clientid, clientsecret, and accesstoken values from your Pi eCard account. Update the plugin's private_key, publishable_key, and access_token options with these values since they will be provided, we can retrive and update it2.
+
++ Make sure that the PHP version of your website is compatible with the plugin's requirements.
+
+The suggestions below could be acheived by a demo app;
++ Install and activate the WooCommerce plugin on your website.
+
++ Install and activate the Pi eCard for WooCommerce plugin on your website.
+
++ We can test the plugin by making a test transaction using the Pi eCard sandbox mode.
+
++ Once you we have verified that the plugin works correctly, we can switch to live mode by updating the testmode option to 'no' in the plugin's settings.
