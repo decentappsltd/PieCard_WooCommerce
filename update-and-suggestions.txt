@@ -1,14 +1,14 @@
 To ensure that the plugin code works correctly with your website and the Pi eCard platform, you need to perform the following modifications:
 
-+ Is there a way we can retrive their provided webhook url then replace the 'woocommerce_api_complete' action with the correct webhook URL provided by the Pi eCard platform. The webhook URL needs to be registered with the Pi eCard dashboard.
++ Is there a way we can retrieve their provided webhook url then replace the 'woocommerce_api_complete' action with the correct webhook URL provided by the Pi eCard platform. The webhook URL needs to be registered with the Pi eCard dashboard.
 
 + Update the plugin's icon URL to a valid URL for your website.
 
-+ Ensure that you have the correct clientid, clientsecret, and accesstoken values from your Pi eCard account. Update the plugin's private_key, publishable_key, and access_token options with these values since they will be provided, we can retrive and update it2.
++ Ensure that you have the correct clientid, clientsecret, and accesstoken values from your Pi eCard account. Update the plugin's private_key, publishable_key, and access_token options with these values since they will be provided, we can retrieve and update it.
 
 + Make sure that the PHP version of your website is compatible with the plugin's requirements.
 
-The suggestions below could be acheived by a demo app;
+The suggestions below could be achieved by a demo app;
 + Install and activate the WooCommerce plugin on your website.
 
 + Install and activate the Pi eCard for WooCommerce plugin on your website.
@@ -28,7 +28,7 @@ The suggestions below could be acheived by a demo app;
   *
   *
   *
-      + Install and set up a local development environment such as XAMPP, WAMP, or MAMP.
+      + Install and set up a local development environment such as XAMPP(I used this back then and it was way convinient, don't if there's a better one now), WAMP, or MAMP.
       + Add the following lines of code at the end of the (pi-ecard-woocommerce.php) file:
 
                 $gateway = new WC_PieCard_Gateway();
@@ -72,7 +72,6 @@ The suggestions below could be acheived by a demo app;
           + Debugging: If the transaction fails or there are any errors. Check the logs, console or developer tools for any error messages.
 
           By following these steps, we should be able to make a transaction from within WordPress.
-        
         
         
         
