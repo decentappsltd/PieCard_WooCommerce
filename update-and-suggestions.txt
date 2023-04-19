@@ -16,3 +16,93 @@ The suggestions below could be acheived by a demo app;
 + We can test the plugin by making a test transaction using the Pi eCard sandbox mode.
 
 + Once you we have verified that the plugin works correctly, we can switch to live mode by updating the testmode option to 'no' in the plugin's settings.
+
+
+
+        /********************************************     TESTING OPTIONS BELOW   ***********************************************/
+
+
+  *
+  *
+        ***** LOCALLY *****
+  *
+  *
+  *
+      + Install and set up a local development environment such as XAMPP, WAMP, or MAMP.
+      + Add the following lines of code at the end of the (pi-ecard-woocommerce.php) file:
+
+                $gateway = new WC_PieCard_Gateway();
+                $order_id = 123; // Replace this with an actual order ID from the store.
+                $gateway->process_payment($order_id);
+
+      + Save the file and open it in your web browser by navigating to "http://localhost/pi-ecard-woocommerce.php".
+      + If there are any errors, you will see them on the page. If not, the code has executed successfully, and the payment gateway should be added to WooCommerce.
+      
+      Note: Replace the $order_id variable with an actual order ID from a store to test the payment process. Also, make sure that the Pi eCard API credentials are correct and that the webhook is set up correctly.
+      
+      
+        *
+        *
+        *
+                                                        ***** TESTING THE PLUGIN  *****
+        *
+        *
+        *
+        *
+              ************ OPTION ONE  ************
+        *
+        *
+        *
+        *
+          
+          To test the plugin in the WooCommerce environment and check if it can make a transaction from within WordPress, we can follow the steps below:
+
+          + Install WooCommerce: If we haven't already installed WooCommerce on our WordPress site (that's why i asked if we have a demo site already), we need to do that first. We can install WooCommerce like any other WordPress plugin from the WordPress plugin repository.
+
+          + Install our plugin: Is our plugin live on the WordPress plugin repo? If so we should install it or by upload the plugin files to our WordPress installation.
+
+          + Activate the plugin: After installing our plugin, activate it by going to the WordPress Dashboard > Plugins and clicking the 'Activate' button for our plugin.
+
+          + Configure the plugin: If the plugin has any settings, configure them according to your needs (I think this should be all the keys and data required).
+
+          + Add test products: Create some test products in WooCommerce that we can use to test the transaction functionality of our plugin.
+
+          + Test the plugin: Add the test products to the cart and go through the checkout process to see if the plugin is capable of making a transaction.
+
+          + Debugging: If the transaction fails or there are any errors. Check the logs, console or developer tools for any error messages.
+
+          By following these steps, we should be able to make a transaction from within WordPress.
+        
+        
+        
+        
+        *
+        *
+        *
+        *
+                      ************ OPTION TWO  ************
+                      
+        *
+        * I think this steps should be the WooCommerce integrating our plugin as a payment method.
+        *
+        *
+        *
+          + Install and activate our plugin on your WooCommerce website.
+
+          + In the WordPress dashboard, go to WooCommerce > Settings > Payments and find the Pi eCard payment gateway.
+
+          + Enable the Pi eCard payment gateway and enter the required details for testing (such as the sandbox mode, public key, private key, and access token). Make sure to save your changes.
+
+          + Create a test product in a WooCommerce store and add it to your cart.
+
+          + Proceed to checkout and select the Pi eCard payment method.
+
+          + Complete the checkout process, and it should be redirected to the Pi eCard payment page.
+
+          + Then in the Pi eCard payment page, use test details to complete the payment (these are usually provided by the payment gateway).
+
+          + After completing the payment, it should be redirected back to the WooCommerce store, and the order status should be updated accordingly (probably handelde by the client).
+
+      * Verify that the payment was processed correctly and that the order details are correct.
+
+If everything looks good, disable the sandbox mode/testmode and enter your live account details to start accepting real payments.
