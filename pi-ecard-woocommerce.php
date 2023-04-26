@@ -4,23 +4,43 @@
  * Description: Take Pi eCard payments on your store.
  * Author: Decent Apps Ltd
  * Author URI: https://decentapps.co.uk
- * Version: 0.1.0
+ * Version: 1.0.0
  */
 
 /*
  * Register the PHP class as a WooCommerce payment gateway
  */
-add_filter('woocommerce_payment_gateways', 'piecard_add_gateway_class');
 function piecard_add_gateway_class($gateways)
 {
   $gateways[] = 'WC_PieCard_Gateway';
   return $gateways;
 }
+add_filter('woocommerce_payment_gateways', 'piecard_add_gateway_class');
+
+
+/**
+ * Custom currency and currency symbol
+ */
+add_filter( 'woocommerce_currencies', 'add_my_currency' );
+
+function add_my_currency( $currencies ) {
+     $currencies['Pi'] = __( 'Pi Network', 'piwoo' );
+     return $currencies;
+}
+
+add_filter('woocommerce_currency_symbol', 'add_my_currency_symbol', 10, 2);
+
+function add_my_currency_symbol( $currency_symbol, $currency ) {
+     switch( $currency ) {
+          case 'Pi': $currency_symbol = 'π'; break;
+     }
+     return $currency_symbol;
+}
+
 
 /*
  * Pi eCard Payment Gateway Class
  */
-add_action('plugins_loaded', 'piecard_init_gateway_class');
 function piecard_init_gateway_class()
 {
 
@@ -51,6 +71,8 @@ function piecard_init_gateway_class()
       $this->description = 'Pay with PI';
       $this->enabled = $this->get_option('enabled');
       $this->testmode = 'yes' === $this->get_option('testmode');
+      $this->url = $this->get_option('url');
+      $this->name = $this->get_option('name');
       $this->private_key = $this->get_option('private_key');
       $this->publishable_key = $this->get_option('publishable_key');
       $this->access_token = $this->get_option('access_token');
@@ -85,6 +107,16 @@ function piecard_init_gateway_class()
           'default' => 'yes',
           'desc_tip' => true,
         ),
+        'url' => array(
+          'title' => 'URL',
+          'type' => 'text',
+          'description' => 'The URL of your live site. Note this must start with https:// and be correct for this plugin to work. Do not include trailing slash (/).',
+        ),
+        'name' => array(
+          'title' => 'Store Name',
+          'type' => 'text',
+          'description' => 'The name of your store as you would like it to appear on the payment page. This is required',
+        ),
         'publishable_key' => array(
           'title' => 'Public Key',
           'type' => 'text'
@@ -111,48 +143,66 @@ function piecard_init_gateway_class()
 
       $order = wc_get_order($order_id);
 
-      $args = array(
-        "amount" => $order->get_total(),
-        "memo" => $order->get_id(),
-        "sandbox" => $this->testmode,
-        "metadata" => array(
-          "order_id" => $order->get_id(),
-          "customer_id" => $order->get_customer_id(),
-        ),
-        "successURL" => $this->get_return_url($order),
-        "cancelURL" => "https://epimall.io/cart/",
-      );
+      // Data to be sent
+      $data = [
+        'amount' => doubleval($order->get_total()),
+        'memo' => $this->name . ' Order #' . $order_id,  // IMPORTANT: DO NOT CHANGE THIS! This is used to identify the payment on your Pi eCard account
+        'metadata' => [
+          'orderId' => $order_id,
+        ],
+        'sandbox' => true,
+        'successURL' => $this->url . '/wc-api/complete?id=' . $order_id,
+        'cancelURL' => $this->url . '/checkout'
+      ];
 
-      $url = 'https://api.piecard.app/payment';
+      // Headers
+      $headers = [
+        'clientid: ' . $this->publishable_key,
+        'clientsecret: ' . $this->private_key,
+        'accesstoken: ' . $this->access_token,
+      ];
 
-      $options = array(
-        'http' => array(
-          'header' => [
-            "Content-type: application/json",
-            "clientid: " . $this->publishable_key,
-            "clientsecret: " . $this->private_key,
-            "accesstoken: " . $this->access_token,
-          ],
-          'method' => 'POST',
-          'content' => http_build_query($args)
+      // Make the request
+      $curl = curl_init();
+
+      curl_setopt_array(
+        $curl,
+        array(
+          CURLOPT_URL => "https://api.piecard.app/payment",
+          CURLOPT_RETURNTRANSFER => true,
+          CURLOPT_ENCODING => "",
+          CURLOPT_MAXREDIRS => 10,
+          CURLOPT_TIMEOUT => 0,
+          CURLOPT_FOLLOWLOCATION => true,
+          CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+          CURLOPT_CUSTOMREQUEST => "POST",
+          CURLOPT_POSTFIELDS => json_encode($data),
+          CURLOPT_HTTPHEADER => array_merge(array("Content-Type: application/json"), $headers)
         )
       );
-      $context = stream_context_create($options);
-      $result = file_get_contents($url, false, $context);
-      if ($result === FALSE)
-        return;
 
-      $result = json_decode($result);
+      $response = curl_exec($curl);
 
-      if ($result->status == "success") {
-        $order->update_status('on-hold', __('Awaiting Pi eCard payment', 'woocommerce'));
-        $woocommerce->cart->empty_cart();
+      curl_close($curl);
+
+      // Check the response
+      $responseData = json_decode($response, true);
+
+      if ($responseData['success'] == true) {
+        // Create the redirect URL
+        $url = 'https://piecard.app/pay/' . $responseData['data']['id'];
+
         return array(
           'result' => 'success',
-          'redirect' => 'https://piecard.app/pay/' . $result->data->id
+          'redirect' => $url
+        );
+      } else {
+        echo $responseData['data']['message'] ?? 'fail';
+        return array(
+          'result' => 'failed',
+          'redirect' => false
         );
       }
-
     }
 
     /*
@@ -161,30 +211,59 @@ function piecard_init_gateway_class()
     public function webhook()
     {
 
-      $opts = array(
-        'http' => array(
-          'method' => "GET",
-          'header' => [
-            "clientid: " . $this->publishable_key,
-            "clientsecret: " . $this->private_key,
-            "accesstoken: " . $this->access_token,
-          ],
+      // validate payment is completed with Pi eCard servers
+      $data = [
+        'id' => $_GET['id'],
+        'name' => $this->name
+      ];
+
+      // Headers
+      $headers = [
+        'clientid: ' . $this->publishable_key,
+        'clientsecret: ' . $this->private_key,
+        'accesstoken: ' . $this->access_token,
+      ];
+
+      // Make the request
+      $curl = curl_init();
+
+      curl_setopt_array(
+        $curl,
+        array(
+          CURLOPT_URL => "https://api.piecard.app/payment/woocommerce/verify",
+          CURLOPT_RETURNTRANSFER => true,
+          CURLOPT_ENCODING => "",
+          CURLOPT_MAXREDIRS => 10,
+          CURLOPT_TIMEOUT => 0,
+          CURLOPT_FOLLOWLOCATION => true,
+          CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+          CURLOPT_CUSTOMREQUEST => "POST",
+          CURLOPT_POSTFIELDS => json_encode($data),
+          CURLOPT_HTTPHEADER => array_merge(array("Content-Type: application/json"), $headers)
         )
       );
 
-      $context = stream_context_create($opts);
+      $response = curl_exec($curl);
 
-      // Open the file using the HTTP headers set above
-      $file = file_get_contents('https://api.piecard.app/payment/' . $_GET['id'], false, $context);
+      curl_close($curl);
 
-      $result = json_decode($file);
+      // Check the response
+      $responseData = json_decode($response, true);
 
-      if ($result->data->status === true) {
-        $order = wc_get_order($_GET['id']);
-        $order->payment_complete();
-        $order->reduce_order_stock();
-      } else return false;
+      if ($responseData['data']['payment'] == false) {
+        echo $responseData['data']['message'] ?? 'fail';
+        return;
+      }
+
+      $order = wc_get_order($_GET['id']);
+      $order->payment_complete();
+      $order->reduce_order_stock();
+
+      // return redirect to complete page
+      wp_redirect($this->url . '/checkout/order-received/' . $_GET['id'] . '?key=' . $order->get_order_key());
+      exit;
 
     }
   }
 }
+add_action('plugins_loaded', 'piecard_init_gateway_class');
