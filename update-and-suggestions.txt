@@ -105,3 +105,36 @@ The suggestions below could be achieved by a demo app;
       * Verify that the payment was processed correctly and that the order details are correct.
 
 If everything looks good, disable the sandbox mode/testmode and enter your live account details to start accepting real payments.
+
+
+
+
+
+        /********************************************     CONNECTING DATABASE TO SITE   ***********************************************/
+
+        To connect a MySQL database to your WordPress site, follow these steps:
+
+        1. Log in to the WordPress site's admin dashboard.
+
+        2. Click on "Plugins" in the left-hand menu and then click on "Add New."
+
+        3. In the search bar, type "MySQL" and hit Enter.
+
+        4. Install and activate the "WPDB SpringClean" plugin. This plugin cleans up the database and optimizes it for better performance.
+
+        5. Go to the WordPress site's 'wp-config.php' file. This file can be found in the root directory of the WordPress installation.
+
+        6. Add the following lines of code to the 'wp-config.php' file, replacing "database_name_here," "username_here," and "password_here" with the actual name of the database, MySQL username, and MySQL password:
+
+                        ```
+                        define('DB_NAME', 'database_name_here');
+                        define('DB_USER', 'username_here');
+                        define('DB_PASSWORD', 'password_here');
+                        define('DB_HOST', 'localhost');
+                        define('DB_CHARSET', 'utf8mb4');
+                        define('DB_COLLATE', ''); // You can leave this as is
+                        ```
+
+        7. Save the wp-config.php file.
+
+        The WordPress site should now be connected to the MySQL database. If you encounter any issues, double-check that you have entered the correct database name, username, and password, and that the MySQL server is running properly, otherwise do let me know.
