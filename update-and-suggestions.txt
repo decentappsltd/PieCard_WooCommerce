@@ -138,3 +138,33 @@ If everything looks good, disable the sandbox mode/testmode and enter your live 
         7. Save the wp-config.php file.
 
         The WordPress site should now be connected to the MySQL database. If you encounter any issues, double-check that you have entered the correct database name, username, and password, and that the MySQL server is running properly, otherwise do let me know.
+        
+        
+        
+
+
+
+
+
+        /**************    V1.0.0 MODIFICATIONS THAT COULD BE MADE TO ENHANCE THE SECURITY AND FUNCTIONALITY  **********************/
+        
+        
+       
+        1. Validate user input - validate and sanitize all user input data to avoid security vulnerabilities like SQL injection and cross-site scripting (XSS) attacks. Use functions like `sanitize_text_field()`, `wp_kses_post()`, or `esc_html()` to sanitize input data.
+
+        2. Use HTTPS protocol - use HTTPS protocol to ensure that all data transmitted between the client and the server is encrypted and secure. This can be done by ensuring that the website is SSL/TLS enabled.
+
+        3. Implement nonce - use a nonce to verify that the form data is submitted from a trusted source and to prevent CSRF attacks. WordPress provides a built-in function `wp_nonce_field()` to generate nonces.
+
+        4. Store API keys securely - instead of storing API keys in plain text format, use a secure method like environment variables or an encryption mechanism to store and retrieve API keys.
+
+        5. Implement error handling - implement error handling to handle exceptions and error messages gracefully. This will help users understand what went wrong in case of an error.
+
+        6. Use WP_Error for error messages - use the `WP_Error` class to handle error messages in a more structured way. This will provide a consistent error handling experience for the user.
+
+        7. Use WordPress functions - use WordPress functions whenever possible to ensure compatibility with future versions of WordPress and to maintain a consistent coding style. For example, use `wc_get_order()` to retrieve the order object instead of using the raw `$order_id`.
+
+        8. Use prepared statements - use prepared statements to prevent SQL injection attacks. Prepared statements provide a secure and efficient way to execute SQL queries. (Maybe this could be implemented in a later version)
+
+        10. Implement logging - implement logging to track errors and debug information. This will help in troubleshooting and fixing issues.
+
