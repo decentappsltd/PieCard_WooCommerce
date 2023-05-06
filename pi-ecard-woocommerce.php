@@ -4,7 +4,7 @@
  * Description: Take Pi eCard payments on your store.
  * Author: Decent Apps Ltd
  * Author URI: https://decentapps.co.uk
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 
 /*
@@ -150,7 +150,7 @@ function piecard_init_gateway_class()
         'metadata' => [
           'orderId' => $order_id,
         ],
-        'sandbox' => true,
+        'sandbox' => $this->testmode,
         'successURL' => $this->url . '/wc-api/complete?id=' . $order_id,
         'cancelURL' => $this->url . '/checkout'
       ];
