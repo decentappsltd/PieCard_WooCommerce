@@ -193,7 +193,7 @@ function piecard_init_gateway_class()
 
       if ($responseData['success'] == true) {
         // Create the redirect URL
-        $url = 'https://piecard.app/pay/' . $responseData['data']['id'];
+        $url = 'https://piecard.app/pay/' . $responseData['data']['id'] . '?redirect=true';
 
         return array(
           'result' => 'success',
